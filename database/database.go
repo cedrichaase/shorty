@@ -8,10 +8,14 @@ import (
     "go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+
+    "ha.si/shorty/helper"
 )
 
 var client mongo.Client
 var ctx context.Context
+
+var uri = helper.GetEnv("MONGODB_URI", "mongodb://localhost:27017")
 
 type ShortcutDocument struct {
     Shortcut     string `json:"shortcut" bson:"shortcut" binding:"required"`
@@ -45,7 +49,7 @@ func AddShortcut(shortcut string, url string) {
 }
 
 func FindUrlByShortcut(shortcut string) string {
-    client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://localhost:27017"))
+    client, err := mongo.NewClient(options.Client().ApplyURI(uri))
     if err != nil {
         log.Fatal(err)
     }
