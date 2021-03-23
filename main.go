@@ -20,11 +20,6 @@ type CreateShortcutRequestBody struct {
 func CreateShortcutHandler(writer http.ResponseWriter, request *http.Request) {
     writer.Header().Set("Content-Type", "application/json")
 
-	if request.Method != "POST" {
-		writer.WriteHeader(http.StatusNotFound)
-		writer.Write([]byte(`{"message": "Not found"}`))
-	}
-
 	var body CreateShortcutRequestBody	
 
 	decoder := json.NewDecoder(request.Body)
@@ -45,38 +40,26 @@ func CreateShortcutHandler(writer http.ResponseWriter, request *http.Request) {
 }
 
 func AccessShortcutHandler(writer http.ResponseWriter, request *http.Request) {
-	if request.Method != "GET" {
-		writer.WriteHeader(http.StatusNotFound)
-		writer.Write([]byte(`{"message": "Not found"}`))
-	}
-
 	vars := mux.Vars(request)
 
 	var url = database.FindUrlByShortcut(vars["shortcut"])
 
-	// writer.WriteHeader(http.StatusMovedPermanently)
-    // writer.Header().Add("Location", url)
-	// writer.Header().Add("Content-Type", "text/html")
-
-	// writer.Write([]byte(fmt.Sprintf(`
-	// 	<html>
-	// 	<head>
-	// 		<title>Shorty</title>
-	// 		</head>
-	// 		<body>
-	// 		<h1>Moved</h1>
-	// 		<p>This page has moved to <a href="%s">%s</a>.</p>
-	// 		</body>
-	// 	</html>
-	// `, url, url)))
+	if len(url) == 0 {
+		writer.WriteHeader(http.StatusNotFound)
+		return
+	}
 
 	http.Redirect(writer, request, url, http.StatusMovedPermanently)
 }
 
 func main() {
 	router := mux.NewRouter()
-	router.HandleFunc("/", CreateShortcutHandler)
-	router.HandleFunc("/{shortcut}", AccessShortcutHandler)
+
+	createRouter := router.Methods("POST").Subrouter()
+	createRouter.HandleFunc("/", CreateShortcutHandler)
+
+	accessRouter := router.Methods("GET").Subrouter()
+	accessRouter.HandleFunc("/{shortcut}", AccessShortcutHandler)
 
 	fmt.Println("Starting server at port 8080\n")
 
