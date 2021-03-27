@@ -7,6 +7,7 @@ import (
 
 	"github.com/cedrichaase/shorty/internal/database"
 	"github.com/cedrichaase/shorty/internal/generator"
+	"github.com/cedrichaase/shorty/internal/helper"
 
 	"github.com/gin-gonic/gin"
 )
@@ -57,5 +58,6 @@ func main() {
 	router.POST("/", CreateShortcutHandler)
 	router.GET("/:shortcut", AccessShortcutHandler)
 
-	router.Run(":8080")
+	var port = helper.GetEnv("HTTP_PORT", "8080")
+	router.Run(fmt.Sprint(":", port))
 }
