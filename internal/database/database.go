@@ -9,7 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
-	"ha.si/shorty/helper"
+	"github.com/cedrichaase/shorty/internal/helper"
 )
 
 var client mongo.Client

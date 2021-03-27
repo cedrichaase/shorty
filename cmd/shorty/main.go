@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"ha.si/shorty/database"
-	"ha.si/shorty/generator"
+	"github.com/cedrichaase/shorty/internal/database"
+	"github.com/cedrichaase/shorty/internal/generator"
 
 	"github.com/gin-gonic/gin"
 )

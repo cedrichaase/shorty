@@ -1,4 +1,4 @@
-module ha.si/shorty
+module github.com/cedrichaase/shorty
 
 go 1.14
 
