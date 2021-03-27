@@ -1,69 +1,55 @@
 package main
 
 import (
-	"fmt"
-	"log"
-	"net/http"
 	"encoding/json"
+	"net/http"
 
 	"ha.si/shorty/database"
 	"ha.si/shorty/generator"
 
-	"github.com/gorilla/mux"
+	"github.com/gin-gonic/gin"
 )
 
 type CreateShortcutRequestBody struct {
-	Url 	string `json:"url" binding:"required"`
-	Format 	string `json:"format,omitempty"`
+	Url    string `json:"url" binding:"required"`
+	Format string `json:"format,omitempty"`
 }
 
-func CreateShortcutHandler(writer http.ResponseWriter, request *http.Request) {
-    writer.Header().Set("Content-Type", "application/json")
+func CreateShortcutHandler(c *gin.Context) {
+	var body CreateShortcutRequestBody
 
-	var body CreateShortcutRequestBody	
-
-	decoder := json.NewDecoder(request.Body)
+	decoder := json.NewDecoder(c.Request.Body)
 	err := decoder.Decode(&body)
 
 	if err != nil {
-		writer.WriteHeader(http.StatusInternalServerError)
-		writer.Write([]byte(`{"message": "Internal Server Error"}`))
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Error parsing JSON"})
 		return
 	}
 
 	var shortcut = generator.GenerateMnemonic()
-
 	database.AddShortcut(shortcut, body.Url)
 
-	writer.WriteHeader(http.StatusOK)
-	writer.Write([]byte(shortcut))
+	c.JSON(http.StatusOK, gin.H{"name": shortcut})
 }
 
-func AccessShortcutHandler(writer http.ResponseWriter, request *http.Request) {
-	vars := mux.Vars(request)
+func AccessShortcutHandler(c *gin.Context) {
+	var shortcut = c.Param("shortcut")
 
-	var url = database.FindUrlByShortcut(vars["shortcut"])
+	var url = database.FindUrlByShortcut(shortcut)
 
 	if len(url) == 0 {
-		writer.WriteHeader(http.StatusNotFound)
+		c.JSON(http.StatusNotFound, gin.H{"message": "No URL found for given shortcut"})
 		return
 	}
 
-	http.Redirect(writer, request, url, http.StatusMovedPermanently)
+	c.Redirect(http.StatusMovedPermanently, url)
 }
 
 func main() {
-	router := mux.NewRouter()
+	router := gin.Default()
 
-	createRouter := router.Methods("POST").Subrouter()
-	createRouter.HandleFunc("/", CreateShortcutHandler)
+	router.POST("/", CreateShortcutHandler)
+	router.GET("/:shortcut", AccessShortcutHandler)
 
-	accessRouter := router.Methods("GET").Subrouter()
-	accessRouter.HandleFunc("/{shortcut}", AccessShortcutHandler)
-
-	fmt.Println("Starting server at port 8080\n")
-
-	if err := http.ListenAndServe(":8080", router); err != nil {
-		log.Fatal(err)
-	}
+	router.Run(":8080")
 }
