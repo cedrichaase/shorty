@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"ha.si/shorty/database"
@@ -26,10 +27,16 @@ func CreateShortcutHandler(c *gin.Context) {
 		return
 	}
 
-	var shortcut = generator.GenerateMnemonic()
+	var shortcut = generator.GenerateByName(body.Format)
+
+	if len(shortcut) == 0 {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Error generating shortcut"})
+		return
+	}
+
 	database.AddShortcut(shortcut, body.Url)
 
-	c.JSON(http.StatusOK, gin.H{"name": shortcut})
+	c.JSON(http.StatusOK, gin.H{"location": fmt.Sprintf("/%v", shortcut)})
 }
 
 func AccessShortcutHandler(c *gin.Context) {

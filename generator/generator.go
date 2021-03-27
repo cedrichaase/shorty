@@ -1,13 +1,24 @@
 package generator
 
-import(
-	"time"
-	"strings"
+import (
 	"math/rand"
+	"strings"
+	"time"
+
 	"github.com/oklog/ulid/v2"
 
 	"github.com/dongri/go-mnemonic"
 )
+
+func GenerateByName(name string) string {
+	if name == "mnemonic" {
+		return GenerateMnemonic()
+	} else if name == "ulid" {
+		return GenerateUlid()
+	}
+
+	return ""
+}
 
 func GenerateMnemonic() string {
 	var words, _ = mnemonic.GenerateMnemonic(128, mnemonic.LanguageEnglish)
