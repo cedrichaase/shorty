@@ -4,7 +4,7 @@ go 1.14
 
 require (
 	github.com/dongri/go-mnemonic v0.0.0-20180529164210-dc9bfc04a038
-	github.com/gin-gonic/gin v1.6.3 // indirect
+	github.com/gin-gonic/gin v1.6.3
 	github.com/go-playground/validator/v10 v10.4.1 // indirect
 	github.com/golang/protobuf v1.5.1 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect

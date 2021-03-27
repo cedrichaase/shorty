@@ -12,8 +12,8 @@ import (
 )
 
 type CreateShortcutRequestBody struct {
-	Url    string `json:"url" binding:"required"`
-	Format string `json:"format,omitempty"`
+	Url    string             `json:"url" binding:"required"`
+	Format generator.AlgoName `json:"format,omitempty"`
 }
 
 func CreateShortcutHandler(c *gin.Context) {
@@ -27,15 +27,14 @@ func CreateShortcutHandler(c *gin.Context) {
 		return
 	}
 
-	var shortcut = generator.GenerateByName(body.Format)
+	shortcut, error := generator.Generate(body.Format)
 
-	if len(shortcut) == 0 {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Error generating shortcut"})
+	if error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": error.Error()})
 		return
 	}
 
 	database.AddShortcut(shortcut, body.Url)
-
 	c.JSON(http.StatusOK, gin.H{"location": fmt.Sprintf("/%v", shortcut)})
 }
 
