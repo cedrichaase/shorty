@@ -1,8 +1,8 @@
 FROM golang:1.14 AS builder
 ADD . /src
-RUN cd /src && go build -o shorty /src/cmd/shorty/main.go
+RUN cd /src && go build -o shortd /src/cmd/shortd/main.go
 
 FROM ubuntu:latest
 WORKDIR /app
-COPY --from=builder /src/shorty /app/
-ENTRYPOINT [ "./shorty" ]
+COPY --from=builder /src/shortd /app/
+ENTRYPOINT [ "./shortd" ]
